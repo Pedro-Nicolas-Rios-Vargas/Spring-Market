@@ -1,4 +1,4 @@
-FROM ubuntu:latest
+FROM postgres:latest
 LABEL authors="ordep"
 
-ENTRYPOINT ["top", "-b"]
+COPY ["schema.sql", "/docker-entrypoint-initdb.d/"]

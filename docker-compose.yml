@@ -1,0 +1,26 @@
+version: 2.23.0
+
+services:
+  market_db:
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d market -U postgres"]
+    build: ./pg_market/
+    volumes:
+      - postgres-data:/var/lib/pgsql/data
+    environment:
+      POSTGRES_PASSWORD: "prueba12345"
+
+  market_app:
+    image: gradle:latest
+    command: [ "./gradlew", "bootRun" ]
+    volumes:
+      - .:/home/gradle/project
+    working_dir: "/home/gradle/project"
+    ports:
+      - "8090:8090"
+    depends_on:
+      market_db:
+        condition: "service_healthy"
+
+volumes:
+  postgres-data:
