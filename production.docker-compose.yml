@@ -1,0 +1,46 @@
+version: 2.23.0
+
+services:
+  market_db:
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d market -U postgres"]
+    build: ./pg_market/
+    volumes:
+      - postgres-data:/var/lib/pgsql/data
+    environment:
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_pass
+    secrets:
+      - db_pass
+
+  market_pdn_app:
+    # uncomment in case of wanna do test over amazoncorretto container
+    # command: tail -f /dev/null
+    build:
+      context: .
+      dockerfile: production.Dockerfile
+    environment:
+      PORT: 80
+        # Default env vars used by Spring to gatter datasource conn keys
+        # SPRING_DATASOURCE_URL: /run/secrets/db_url
+        # SPRING_DATASOURCE_USERNAME: /run/secrets/db_username
+        # SPRING_DATASOURCE_PASSWORD: /run/secrets/db_pass
+    ports:
+      - "8090:80"
+    depends_on:
+      market_db:
+        condition: "service_healthy"
+    secrets:
+      - db_url
+      - db_username
+      - db_pass
+
+secrets:
+  db_url:
+    file: ./db_url.txt
+  db_username:
+    file: ./db_username.txt
+  db_pass:
+    file: ./db_password.txt
+
+volumes:
+  postgres-data:
