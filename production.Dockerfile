@@ -9,7 +9,7 @@ WORKDIR /home/gradle/project
 RUN ["./gradlew", "bootJar"]
 
 
-FROM amazoncorretto:21
+FROM amazoncorretto:21-alpine
 
 COPY --from=builder ["/home/gradle/project/build/libs/market-1.0.jar", "/usr/src/"]
 
